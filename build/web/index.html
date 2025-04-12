@@ -70,18 +70,45 @@
   </div>
   <script>
     window.addEventListener('load', function(ev) {
+      console.log('Window loaded');
       // Download main.dart.js
       var loading = document.querySelector('#loading');
+      
+      // Detect if main.dart.js exists
+      fetch('main.dart.js')
+        .then(response => {
+          if (!response.ok) {
+            console.error('main.dart.js not found or not accessible', response.status);
+            document.body.innerHTML += '<p style="color:red;text-align:center">Error: Could not load Flutter app (main.dart.js not found)</p>';
+          } else {
+            console.log('main.dart.js found, size:', response.headers.get('content-length'));
+          }
+        })
+        .catch(error => {
+          console.error('Error checking main.dart.js', error);
+          document.body.innerHTML += '<p style="color:red;text-align:center">Error: Network issue loading Flutter app</p>';
+        });
+      
+      // Load Flutter app
       _flutter.loader.loadEntrypoint({
         serviceWorker: {
           serviceWorkerVersion: serviceWorkerVersion,
         },
         onEntrypointLoaded: function(engineInitializer) {
+          console.log('Entrypoint loaded');
           engineInitializer.initializeEngine().then(function(appRunner) {
-            loading.classList.add('hidden');
+            console.log('Engine initialized');
+            loading.style.display = 'none';
             appRunner.runApp();
+            console.log('App started');
+          }).catch(function(error) {
+            console.error('Failed to initialize engine', error);
+            document.body.innerHTML += '<p style="color:red;text-align:center">Error: Failed to initialize Flutter engine</p>';
           });
         }
+      }).catch(function(error) {
+        console.error('Failed to load entrypoint', error);
+        document.body.innerHTML += '<p style="color:red;text-align:center">Error: Failed to load Flutter entrypoint</p>';
       });
     });
   </script>
