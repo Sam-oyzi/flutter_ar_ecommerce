@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="/flutter_ar_ecommerce/">
+  <title>Flutter Engine Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 10px;
+      border-radius: 4px;
+    }
+    .success { background-color: #dff0d8; color: #3c763d; }
+    .error { background-color: #f2dede; color: #a94442; }
+    .loading { background-color: #fcf8e3; color: #8a6d3b; }
+  </style>
+  <script src="flutter.js" defer></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Flutter Engine Test</h1>
+    <p>This page tests if the Flutter engine can be loaded correctly.</p>
+    
+    <div id="status" class="status loading">Testing Flutter engine...</div>
+    
+    <div id="debug">
+      <h2>Debug Log:</h2>
+      <pre id="log" style="background-color: #f5f5f5; padding: 10px; overflow: auto; max-height: 300px;"></pre>
+    </div>
+    
+    <script>
+      const logElement = document.getElementById('log');
+      const statusElement = document.getElementById('status');
+      
+      function log(message, isError = false) {
+        const timestamp = new Date().toLocaleTimeString();
+        const line = `[${timestamp}] ${message}`;
+        logElement.textContent += line + '\n';
+        console[isError ? 'error' : 'log'](message);
+      }
+      
+      function updateStatus(message, type) {
+        statusElement.textContent = message;
+        statusElement.className = `status ${type}`;
+      }
+      
+      // Check if flutter.js loaded
+      window.addEventListener('load', function() {
+        log('Page loaded');
+        
+        if (window._flutter) {
+          log('Flutter.js loaded successfully');
+          
+          try {
+            log('Attempting to load Flutter engine...');
+            _flutter.loader.loadEntrypoint({
+              onEntrypointLoaded: function(engineInitializer) {
+                log('Flutter entrypoint loaded successfully');
+                
+                engineInitializer.initializeEngine()
+                  .then(function() {
+                    log('Flutter engine initialized successfully');
+                    updateStatus('Flutter engine loaded successfully!', 'success');
+                  })
+                  .catch(function(error) {
+                    log('Failed to initialize Flutter engine: ' + error, true);
+                    updateStatus('Failed to initialize Flutter engine', 'error');
+                  });
+              }
+            })
+            .catch(function(error) {
+              log('Failed to load Flutter entrypoint: ' + error, true);
+              updateStatus('Failed to load Flutter entrypoint', 'error');
+            });
+          } catch (error) {
+            log('Error while loading Flutter: ' + error, true);
+            updateStatus('Error while loading Flutter', 'error');
+          }
+        } else {
+          log('Flutter.js did not load', true);
+          updateStatus('Flutter.js did not load', 'error');
+        }
+        
+        // Try to fetch main.dart.js
+        fetch('main.dart.js')
+          .then(response => {
+            if (response.ok) {
+              log(`main.dart.js exists (${response.headers.get('content-length')} bytes)`);
+            } else {
+              log(`main.dart.js not found: ${response.status}`, true);
+            }
+          })
+          .catch(error => {
+            log(`Error fetching main.dart.js: ${error}`, true);
+          });
+          
+        // Try to fetch canvaskit.wasm
+        fetch('canvaskit/canvaskit.wasm')
+          .then(response => {
+            if (response.ok) {
+              log(`canvaskit.wasm exists (${response.headers.get('content-length')} bytes)`);
+            } else {
+              log(`canvaskit.wasm not found: ${response.status}`, true);
+            }
+          })
+          .catch(error => {
+            log(`Error fetching canvaskit.wasm: ${error}`, true);
+          });
+      });
+    </script>
+  </div>
+</body>
+</html> 
