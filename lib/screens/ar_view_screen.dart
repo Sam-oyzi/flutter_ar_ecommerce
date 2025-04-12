@@ -68,6 +68,14 @@ class ARViewScreen extends StatelessWidget {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.pushNamed(context, '/ar-viewer');
+        },
+        icon: const Icon(Icons.view_in_ar),
+        label: const Text('Open AR Viewer'),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+      ),
     );
   }
 } 

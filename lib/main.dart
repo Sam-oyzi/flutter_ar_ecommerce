@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'screens/home_screen.dart';
 import 'screens/product_detail_screen.dart';
 import 'screens/ar_view_screen.dart';
+import 'ar_product_viewer.dart';
 
 void main() {
   runApp(const MyApp());
@@ -46,6 +47,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/product-detail': (context) => const ProductDetailScreen(),
         '/ar-view': (context) => const ARViewScreen(),
+        '/ar-viewer': (context) => const ARViewer(),
       },
     );
   }
@@ -86,13 +88,7 @@ class SimpleViewer extends StatelessWidget {
             const SizedBox(height: 30),
             ElevatedButton(
               onPressed: () {
-                // Here you would navigate to the ARViewer
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("AR View will be loaded here"),
-                    duration: Duration(seconds: 2),
-                  ),
-                );
+                Navigator.pushNamed(context, '/ar-viewer');
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.purple.shade300,
