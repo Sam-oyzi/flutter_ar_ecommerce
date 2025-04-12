@@ -62,54 +62,88 @@
     @keyframes spinner {
       to {transform: rotate(360deg);}
     }
+    .error-message {
+      background-color: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      margin-top: 10px;
+      border: 1px solid #f5c6cb;
+      border-radius: 4px;
+      width: 80%;
+      max-width: 500px;
+      text-align: center;
+    }
+    .debug-link {
+      display: inline-block;
+      margin-top: 15px;
+      color: #007bff;
+      text-decoration: underline;
+    }
   </style>
 </head>
 <body>
   <div id="loading" class="loading">
-    <div class="spinner"></div>
+    <div style="text-align: center;">
+      <div class="spinner"></div>
+      <p style="margin-top: 10px;">Loading AR Furniture Shop...</p>
+      <div id="error-container"></div>
+    </div>
   </div>
   <script>
     window.addEventListener('load', function(ev) {
       console.log('Window loaded');
       // Download main.dart.js
       var loading = document.querySelector('#loading');
+      var errorContainer = document.getElementById('error-container');
+      
+      function showError(message) {
+        console.error(message);
+        var errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.innerHTML = message + 
+          '<br><a href="flutter-test.html" class="debug-link">View Diagnostic Page</a>';
+        errorContainer.appendChild(errorDiv);
+      }
       
       // Detect if main.dart.js exists
       fetch('main.dart.js')
         .then(response => {
           if (!response.ok) {
-            console.error('main.dart.js not found or not accessible', response.status);
-            document.body.innerHTML += '<p style="color:red;text-align:center">Error: Could not load Flutter app (main.dart.js not found)</p>';
+            showError('Could not load Flutter app (main.dart.js not found)');
           } else {
             console.log('main.dart.js found, size:', response.headers.get('content-length'));
           }
         })
         .catch(error => {
-          console.error('Error checking main.dart.js', error);
-          document.body.innerHTML += '<p style="color:red;text-align:center">Error: Network issue loading Flutter app</p>';
+          showError('Network issue loading Flutter app: ' + error.message);
         });
       
       // Load Flutter app
-      _flutter.loader.loadEntrypoint({
-        serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
-        },
-        onEntrypointLoaded: function(engineInitializer) {
-          console.log('Entrypoint loaded');
-          engineInitializer.initializeEngine().then(function(appRunner) {
-            console.log('Engine initialized');
-            loading.style.display = 'none';
-            appRunner.runApp();
-            console.log('App started');
-          }).catch(function(error) {
-            console.error('Failed to initialize engine', error);
-            document.body.innerHTML += '<p style="color:red;text-align:center">Error: Failed to initialize Flutter engine</p>';
-          });
-        }
-      }).catch(function(error) {
-        console.error('Failed to load entrypoint', error);
-        document.body.innerHTML += '<p style="color:red;text-align:center">Error: Failed to load Flutter entrypoint</p>';
-      });
+      try {
+        _flutter.loader.loadEntrypoint({
+          serviceWorker: {
+            serviceWorkerVersion: serviceWorkerVersion,
+          },
+          onEntrypointLoaded: function(engineInitializer) {
+            console.log('Entrypoint loaded');
+            engineInitializer.initializeEngine().then(function(appRunner) {
+              console.log('Engine initialized');
+              loading.style.display = 'none';
+              appRunner.runApp();
+              console.log('App started');
+            }).catch(function(error) {
+              console.error('Failed to initialize engine', error);
+              showError('Failed to initialize Flutter engine: ' + error.message);
+            });
+          }
+        }).catch(function(error) {
+          console.error('Failed to load entrypoint', error);
+          showError('Failed to load Flutter entrypoint: ' + error.message);
+        });
+      } catch (error) {
+        console.error('Error loading Flutter', error);
+        showError('Error loading Flutter: ' + error.message);
+      }
     });
   </script>
 </body>
