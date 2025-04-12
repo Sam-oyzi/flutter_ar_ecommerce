@@ -16,7 +16,7 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>AR Furniture Shop</title>
+  <title>AR Furniture Shop (HTML Renderer)</title>
   <link rel="manifest" href="manifest.json">
 
   <!-- Model viewer script -->
@@ -25,18 +25,6 @@
   <script>
     // The value below is injected by flutter build, do not touch.
     const serviceWorkerVersion = "42420029";
-    
-    // Debug model-viewer
-    window.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM content loaded');
-      document.addEventListener('model-viewer-load', function(e) {
-        console.log('Model loaded:', e.target.src);
-      });
-      
-      document.addEventListener('model-viewer-error', function(e) {
-        console.error('Model error:', e.detail);
-      });
-    });
   </script>
   <!-- This script adds the flutter initialization JS code -->
   <script src="flutter.js" defer></script>
@@ -85,20 +73,19 @@
   <div id="loading" class="loading">
     <div style="text-align: center;">
       <div class="spinner"></div>
-      <p style="margin-top: 10px;">Loading AR Furniture Shop...</p>
+      <p style="margin-top: 10px;">Loading AR Furniture Shop (HTML Renderer)...</p>
       <div id="error-container"></div>
     </div>
   </div>
   <script>
     window.addEventListener('load', function(ev) {
-      console.log('Window loaded');
+      console.log('Window loaded (HTML renderer)');
       // Download main.dart.js
       var loading = document.querySelector('#loading');
       var errorContainer = document.getElementById('error-container');
       
-      // Set a timeout to show a fallback UI if Flutter doesn't load in 10 seconds
       var loadingTimeout = setTimeout(function() {
-        showError('Flutter app is taking too long to load. Try refreshing the page or check the diagnostic page.');
+        showError('Flutter app is taking too long to load. Try refreshing the page.');
       }, 10000);
       
       function showError(message) {
@@ -106,38 +93,28 @@
         var errorDiv = document.createElement('div');
         errorDiv.className = 'error-message';
         errorDiv.innerHTML = message + 
+          '<br><a href="index.html" class="debug-link">Try CanvasKit Renderer</a>' +
           '<br><a href="flutter-test.html" class="debug-link">View Diagnostic Page</a>';
         errorContainer.appendChild(errorDiv);
       }
       
-      // Detect if main.dart.js exists
-      fetch('main.dart.js')
-        .then(response => {
-          if (!response.ok) {
-            showError('Could not load Flutter app (main.dart.js not found)');
-          } else {
-            console.log('main.dart.js found, size:', response.headers.get('content-length'));
-          }
-        })
-        .catch(error => {
-          showError('Network issue loading Flutter app: ' + error.message);
-        });
-      
-      // Load Flutter app
+      // Load Flutter app with HTML renderer
       try {
         _flutter.loader.loadEntrypoint({
           serviceWorker: {
             serviceWorkerVersion: serviceWorkerVersion,
           },
           onEntrypointLoaded: function(engineInitializer) {
-            console.log('Entrypoint loaded');
-            engineInitializer.initializeEngine().then(function(appRunner) {
-              console.log('Engine initialized');
+            console.log('Entrypoint loaded (HTML renderer)');
+            engineInitializer.initializeEngine({
+              // Force HTML renderer
+              renderer: "html"
+            }).then(function(appRunner) {
+              console.log('Engine initialized (HTML renderer)');
               loading.style.display = 'none';
               appRunner.runApp();
-              console.log('App started');
-              // Clear the timeout when app loads successfully
               clearTimeout(loadingTimeout);
+              console.log('App started (HTML renderer)');
             }).catch(function(error) {
               console.error('Failed to initialize engine', error);
               showError('Failed to initialize Flutter engine: ' + error.message);
